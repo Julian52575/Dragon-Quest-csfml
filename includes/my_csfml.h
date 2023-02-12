@@ -67,6 +67,7 @@ struct csfml_tools {
     float event_buffer;
     float mouvement_buffer;
     float sound_buffer;
+    sfView *view;
 };
 
 void create_ct(struct csfml_tools **ct, char *name);
