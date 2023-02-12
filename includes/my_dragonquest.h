@@ -35,6 +35,7 @@ struct dragon_quest_event {
 
 struct dragon_quest_map {
     sfSprite *visible;
+    sfSprite *upper_layer;
     sfSprite *colision;
     struct dragon_quest_event *e;
 };
@@ -55,6 +56,8 @@ struct dragon_quest {
     struct dragon_quest_player *roto;
     sfVector2f sprite_size;
     sfVector2f sprite_scale;
+    sfVector2f player_scale;
+    short roto_sup;
 };
 
 void game_window(struct csfml_tools *ct, 
