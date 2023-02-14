@@ -67,6 +67,7 @@ struct csfml_tools {
     float event_buffer;
     float mouvement_buffer;
     float sound_buffer;
+    float player_animation_buffer;
     sfView *view;
 };
 
@@ -80,6 +81,7 @@ int display_chained_sprites(sfRenderWindow *window, csprites *cs);
 
 void create_blank_sprite(sfSprite *blank);
 void create_black_sprite(sfSprite *blank);
+sfSprite *create_background_sprite(void);
 
 int is_txt(void);
 

@@ -22,9 +22,10 @@ void create_ct(struct csfml_tools **ct, char *name)
     (*ct)->window = create_renderwindow(1980, 1080, 32, name);
     (*ct)->clock = sfClock_create();
     (*ct)->time = sfClock_getElapsedTime( (*ct)->clock);
-    (*ct)->time_buffer = 0;
-    (*ct)->event_buffer = 0;
-    (*ct)->mouvement_buffer = 0;
+    (*ct)->time_buffer = 0.0;
+    (*ct)->event_buffer = 0.0;
+    (*ct)->mouvement_buffer = 0.0;
+    (*ct)->player_animation_buffer = 0.0;
     (*ct)->view = sfView_create();
     return;
 }
