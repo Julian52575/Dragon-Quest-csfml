@@ -27,5 +27,6 @@ void create_ct(struct csfml_tools **ct, char *name)
     (*ct)->mouvement_buffer = 0.0;
     (*ct)->player_animation_buffer = 0.0;
     (*ct)->view = sfView_create();
+    sfView_zoom((*ct)->view, 1.5 );
     return;
 }

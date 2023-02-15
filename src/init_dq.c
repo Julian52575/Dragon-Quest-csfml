@@ -5,11 +5,19 @@
 static void add_event_data(struct dragon_quest_event **e, char *line)
 {
     //debug
-    printf("_%s_\n", line);
+    printf("-> %s\n", line);
 
     struct dragon_quest_event *element = malloc(sizeof(struct dragon_quest_event) );
-    sfVector2f position = {0, 0};
+    sfVector2f position = {1, 2};
     char *buffer = malloc(sizeof(char) * my_strlen(line) );
+
+    //get the x position
+    line += my_str_append_until(line, ';', buffer, 0);
+    position.x = (float) my_str_to_int(buffer);
+
+    //get the y position
+    line += my_str_append_until(line, ';', buffer, 0);
+    position.y = (float) my_str_to_int(buffer);
 
     switch (line[0]) {
 
@@ -43,6 +51,7 @@ static void add_event_data(struct dragon_quest_event **e, char *line)
 
     }
     printf("    element->item_id %d\n", element->item_id);
+    printf("    element->position (%.2f, %.2f)\n", element->position.x, element->position.y);
     element->next = *e;
     *e = element;
 }
@@ -52,36 +61,30 @@ static void add_map_data(struct dragon_quest **dq)
     for (int i = 0; i < 2; i++) {
         //initialize map, colision and upper layer
         (*dq)->m[i] = malloc(sizeof(struct dragon_quest_map));
-        (*dq)->m[i]->visible = create_sprite( my_str_combine("assets/maps/map", ".png", my_int_to_str(i) ), 3, 4 );
-        (*dq)->m[i]->colision = my_str_to_word_array( my_openfile( my_str_combine("assets/maps/map", "_c.txt", my_int_to_str(i) )  ) );
-        (*dq)->m[i]->upper_layer = create_sprite( my_str_combine("assets/maps/map", "_u.png", my_int_to_str(i) ), 3, 4 );
+        (*dq)->m[i]->visible = create_sprite( my_str_combine("assets/maps/map", "/map.png", my_int_to_str(i) ), 3, 4 );
 
-        //sfSprite_setPosition((*dq)->m[i]->visible, (sfVector2f) { +(*dq)->sprite_size.x * 2, -(*dq)->sprite_size.y } );
+        char *txt = my_openfile( my_str_combine("assets/maps/map", "/c.txt", my_int_to_str(i) ) );
+        if (txt != NULL)
+            (*dq)->m[i]->colision = my_str_to_word_array( txt );
         
-        //debug
-        //for(int debug = 0; (*dq)->m[i]->colision[debug][0]; debug++ ) {
-        //    printf("-> _%s_\n", (*dq)->m[i]->colision[debug] );
-        //}
+        (*dq)->m[i]->upper_layer = create_sprite( my_str_combine("assets/maps/map", "/u.png", my_int_to_str(i) ), 3, 4 );
 
-        //initialize map size from txt
+        //initialize map size
+        (*dq)->m[i]->map_size.x = my_strlen( (*dq)->m[i]->colision[0] );
+        (*dq)->m[i]->map_size.y = my_array_len( (*dq)->m[i]->colision );
+
+        //initialize events from txt
+        printf("staring intializing events\n");
+
         FILE *stream;
         char *line = NULL;
         size_t len = 0;
         ssize_t nread;
 
-        stream = fopen( my_str_combine("assets/maps/map", "_e.txt", my_int_to_str(i) ), "r" );
-        if (!stream)
+        stream = fopen( my_str_combine("assets/maps/map", "/e.txt", my_int_to_str(i) ) ,"r");
+        if (stream == NULL)
             continue;
 
-        //get x size
-        getline(&line, &len, stream);
-        (*dq)->m[i]->map_size.x = my_str_to_int(line) / 10;
-        
-        //get y size
-        getline(&line, &len, stream);
-        (*dq)->m[i]->map_size.y = my_str_to_int(line) / 10;
-
-        //initialize events from txt
         (*dq)->m[i]->e = NULL;
         while ( (nread = getline(&line, &len, stream)) != -1) {
             add_event_data( &(*dq)->m[i]->e , line); 
@@ -90,7 +93,6 @@ static void add_map_data(struct dragon_quest **dq)
         //debug
         printf("->loaded map%d\n", i);
     }
-    //exit(0);
 }
 
 void init_dragonquest(struct dragon_quest **dq)

@@ -1,5 +1,22 @@
 #include "my_dragonquest.h"
 
+static bool is_block_walkable(struct dragon_quest *dq, int y, int x)
+{
+    //check the geometry
+    if (dq->m [ dq->current_map ]->colision[y][x] == '#')
+        return false;
+
+    //check the event list
+    struct dragon_quest_event *tmp_e = dq->m[ dq->current_map ]->e;
+    while (tmp_e) {
+        if ( (y == (int) tmp_e->position.y) && (x == (int) tmp_e->position.x) )
+            return false;
+        tmp_e = tmp_e->next;
+    }
+
+    return true;
+}
+
 static void animate_character(sfSprite *sprite)
 {
     sfIntRect rect = sfSprite_getTextureRect(sprite);
@@ -85,37 +102,61 @@ static void player_imput(struct csfml_tools *ct, struct dragon_quest *dq)
     }
 
     //increase the mouvement info struct to moves the characters if it isn't already moving
-    if (dq->roto->mouvement.step > 0)
+    if (dq->roto->mouvement.step > 1)
         return;
 
     sfVector2f pos = sfSprite_getPosition(dq->roto->sprite);
     int x = pos.x /= dq->sprite_size.x;
     int y = pos.y /= dq->sprite_size.y;
 
-    if (sfKeyboard_isKeyPressed(sfKeyDown) == sfTrue && dq->m[ dq->current_map ]->colision[y + 1][x] != '#' ) {
+    //Down arrow
+    if (sfKeyboard_isKeyPressed(sfKeyDown) == sfTrue) {
+
+        //if nothing blocks the way
+        if (is_block_walkable(dq, y + 1, x) == true )
+            dq->roto->mouvement.next_step = 8;
+
+        //set Facing Block
         dq->roto->mouvement.next_direction = 2;
-        dq->roto->mouvement.next_step = 8;
     }
+   
+    //Left arrow
+    else if (sfKeyboard_isKeyPressed(sfKeyLeft) == sfTrue) {
+
+        //if nothing blocks the wat
+        if (is_block_walkable(dq, y, x - 1) )
+            dq->roto->mouvement.next_step = 8;
     
-    else if (sfKeyboard_isKeyPressed(sfKeyLeft) == sfTrue && dq->m[ dq->current_map ]->colision[y][x - 1] != '#'  ) {
+        //set Facing Block
         dq->roto->mouvement.next_direction = 4;
-        dq->roto->mouvement.next_step = 8;
     }
 
-    else if (sfKeyboard_isKeyPressed(sfKeyRight) == sfTrue && dq->m[ dq->current_map ]->colision[y][x + 1] != '#' ) {
+    //Right arrow
+    else if (sfKeyboard_isKeyPressed(sfKeyRight) == sfTrue) {
+
+        //if nothing blocks the way
+        if (is_block_walkable(dq, y, x + 1) )
+            dq->roto->mouvement.next_step = 8;
+
+        //set Facing block
         dq->roto->mouvement.next_direction = 6;
-        dq->roto->mouvement.next_step = 8;
     }
 
-    else if (sfKeyboard_isKeyPressed(sfKeyUp) == sfTrue && dq->m[ dq->current_map ]->colision[y - 1][x] != '#') {
+    //Up arrow
+    else if (sfKeyboard_isKeyPressed(sfKeyUp) == sfTrue) {
+        
+        //if nothing blocks the way
+        if (is_block_walkable(dq, y - 1, x ) )
+            dq->roto->mouvement.next_step = 8;
+        
+        //set Facing block
         dq->roto->mouvement.next_direction = 8;
-        dq->roto->mouvement.next_step = 8;
     }
 }
 
 void game_window(struct csfml_tools *ct, struct dragon_quest *dq)
 {// !!!!!!!!!!!!!!!! 4 && 6 are inverted for mouvements
-
+    printf("\n---Starting game---\n");
     //debug
     //sfSprite_setPosition(dq->roto->sprite, (sfVector2f) {0, 0});
 
@@ -156,7 +197,6 @@ void game_window(struct csfml_tools *ct, struct dragon_quest *dq)
                       
             //when the player is about to move
             if (dq->roto->mouvement.step == 8 && (dq->roto->mouvement.direction != dq->roto->mouvement.next_direction) ) {
-                //dq->roto->mouvement.direction = dq->roto->mouvement.next_direction;
                 set_character_facing_direction(dq->roto->sprite, dq->roto->mouvement);
                 ct->player_animation_buffer = 0.0;
             }
@@ -190,9 +230,16 @@ void game_window(struct csfml_tools *ct, struct dragon_quest *dq)
         printf("modulo 80 (%.d, %d)\n", (int) sfSprite_getPosition(dq->roto->sprite).x % 60, (int) sfSprite_getPosition(dq->roto->sprite).y % 80);
         printf("mouvement.step && mouvement.direction (%d, %d)\n", dq->roto->mouvement.step, dq->roto->mouvement.direction);
         printf("---\n");
-
+        
         for (int debug = 0; dq->m[ dq->current_map ]->colision[debug][0] ; debug++) {
             printf("_%s_\n", dq->m[ dq->current_map ]->colision[debug] );
+        }
+
+        printf("---\nEvents in map : \n");
+        struct dragon_quest_event *tmp_e = dq->m[ dq->current_map ]->e;
+        while (tmp_e) {
+            printf("(%.2f, %.2f)\n", tmp_e->position.x, tmp_e->position.y);
+            tmp_e = tmp_e->next;
         }
     }
     sfSprite_destroy(background);
