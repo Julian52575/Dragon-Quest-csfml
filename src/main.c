@@ -4,6 +4,7 @@ static void friendship_ended_with_dq_ff_is_now_my_best_friend(
 struct dragon_quest *dq)
 {
     printf("free\n");
+    free(dq->m[0]->e);
     free(dq->m);
     free(dq->i);
 

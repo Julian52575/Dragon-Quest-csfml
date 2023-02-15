@@ -18,6 +18,6 @@ int my_str_append_until(char *str, char end, char *buffer, int b_start)
         buffer[b_start++] = str[0];
     }
     buffer[b_start] = str[0];
-    buffer[++b_start] = '\0';
+    buffer[b_start] = '\0';
     return i + 1;
 }

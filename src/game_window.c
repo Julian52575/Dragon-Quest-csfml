@@ -37,12 +37,13 @@ static void set_character_facing_direction(sfSprite *sprite, mouvement_info mouv
     sfSprite_setTextureRect(sprite, rect);
 }
 
-static void move_character(sfSprite *sprite, mouvement_info mouvement)
+static void move_character(struct dragon_quest *dq, sfSprite *sprite, mouvement_info mouvement)
 {
+
     switch (mouvement.direction) {
         
         //up
-        case (8):
+        case (8): 
             sfSprite_move(sprite, (sfVector2f) {0, -(80/8)} );
             break;
 
@@ -86,22 +87,27 @@ static void player_imput(struct csfml_tools *ct, struct dragon_quest *dq)
     //increase the mouvement info struct to moves the characters if it isn't already moving
     if (dq->roto->mouvement.step > 0)
         return;
-    if (sfKeyboard_isKeyPressed(sfKeyDown) == sfTrue) {
+
+    sfVector2f pos = sfSprite_getPosition(dq->roto->sprite);
+    int x = pos.x /= dq->sprite_size.x;
+    int y = pos.y /= dq->sprite_size.y;
+
+    if (sfKeyboard_isKeyPressed(sfKeyDown) == sfTrue && dq->m[ dq->current_map ]->colision[y + 1][x] != '#' ) {
         dq->roto->mouvement.next_direction = 2;
         dq->roto->mouvement.next_step = 8;
     }
     
-    else if (sfKeyboard_isKeyPressed(sfKeyLeft) == sfTrue) {
+    else if (sfKeyboard_isKeyPressed(sfKeyLeft) == sfTrue && dq->m[ dq->current_map ]->colision[y][x - 1] != '#'  ) {
         dq->roto->mouvement.next_direction = 4;
         dq->roto->mouvement.next_step = 8;
     }
 
-    else if (sfKeyboard_isKeyPressed(sfKeyRight) == sfTrue) {
+    else if (sfKeyboard_isKeyPressed(sfKeyRight) == sfTrue && dq->m[ dq->current_map ]->colision[y][x + 1] != '#' ) {
         dq->roto->mouvement.next_direction = 6;
         dq->roto->mouvement.next_step = 8;
     }
 
-    else if (sfKeyboard_isKeyPressed(sfKeyUp) == sfTrue) {
+    else if (sfKeyboard_isKeyPressed(sfKeyUp) == sfTrue && dq->m[ dq->current_map ]->colision[y - 1][x] != '#') {
         dq->roto->mouvement.next_direction = 8;
         dq->roto->mouvement.next_step = 8;
     }
@@ -164,7 +170,7 @@ void game_window(struct csfml_tools *ct, struct dragon_quest *dq)
                 
             //when the player is moving between tiles
             } else if (dq->roto->mouvement.step > 0) {
-                move_character(dq->roto->sprite, dq->roto->mouvement);
+                move_character( dq, dq->roto->sprite, dq->roto->mouvement);
                 dq->roto->mouvement.step -= 1;            
             } 
             
@@ -184,6 +190,10 @@ void game_window(struct csfml_tools *ct, struct dragon_quest *dq)
         printf("modulo 80 (%.d, %d)\n", (int) sfSprite_getPosition(dq->roto->sprite).x % 60, (int) sfSprite_getPosition(dq->roto->sprite).y % 80);
         printf("mouvement.step && mouvement.direction (%d, %d)\n", dq->roto->mouvement.step, dq->roto->mouvement.direction);
         printf("---\n");
+
+        for (int debug = 0; dq->m[ dq->current_map ]->colision[debug][0] ; debug++) {
+            printf("_%s_\n", dq->m[ dq->current_map ]->colision[debug] );
+        }
     }
     sfSprite_destroy(background);
     return;

@@ -7,6 +7,9 @@ char * my_int_to_str(int nb);
 char *open_file(char *file, int *size);
 int my_strlen(char *str);
 int my_str_append_until(char *str, char end, char *buffer, int b_start);
+int my_str_to_int(char *str);
+char *my_openfile(char *file);
+char **my_str_to_word_array(char *str);
 
 typedef struct coordinates {
     int y;
@@ -27,20 +30,20 @@ struct dragon_quest_item {
     bool overworld;
 };
 
+struct teleportation {
+    unsigned int warp_y;
+    unsigned int warp_x;
+    unsigned int new_map;
+};
+
 struct dragon_quest_event {
     bool visible;
     bool colision;
     int id;//
-    coordinates position;
-    bool dialogue;
+    sfVector2f position;
     char *message;//
-    bool warp;
-    int warp_y;
-    int warp_x;
-    bool other_map;
-    int new_map;//
-    bool item;
-    int what_item; //
+    struct teleportation tp;
+    int item_id; //
     bool rm;
     struct dragon_quest_event *next;
 };
@@ -48,8 +51,9 @@ struct dragon_quest_event {
 struct dragon_quest_map {
     sfSprite *visible;
     sfSprite *upper_layer;
-    sfTexture *colision;
+    char **colision;
     struct dragon_quest_event *e;
+    sfVector2f map_size;
 };
 
 struct dragon_quest_player {
